@@ -1,65 +1,86 @@
-import Image from "next/image";
+import Link from 'next/link'
+import { buttonVariants } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 
-export default function Home() {
+export default function LandingPage() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="min-h-screen bg-white">
+      {/* 헤더 */}
+      <header className="border-b px-6 py-4 flex items-center justify-between max-w-5xl mx-auto">
+        <span className="font-bold text-xl">Cuepath</span>
+        <div className="flex items-center gap-3">
+          <Link href="/login" className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }))}>
+            로그인
+          </Link>
+          <Link href="/signup" className={cn(buttonVariants({ size: 'sm' }))}>
+            시작하기
+          </Link>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </header>
+
+      {/* 히어로 */}
+      <section className="max-w-3xl mx-auto px-6 py-24 text-center space-y-6">
+        <h1 className="text-5xl font-bold leading-tight tracking-tight">
+          커리어의 다음 챕터,<br />
+          검증된 코치와 함께
+        </h1>
+        <p className="text-xl text-gray-500">
+          취업·이직 전문 코치와 1:1 채팅 코칭.<br />
+          결제 후 즉시 시작, 60분 집중 세션.
+        </p>
+        <Link href="/signup" className={cn(buttonVariants({ size: 'lg' }), 'px-8')}>
+          무료로 시작하기
+        </Link>
+      </section>
+
+      {/* 특징 */}
+      <section className="max-w-5xl mx-auto px-6 pb-24">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[
+            {
+              title: '검증된 코치',
+              desc: 'Matthew가 직접 검증한 커리어 전문가. IT·마케팅·금융·스타트업 등 10개 도메인.',
+            },
+            {
+              title: '안전한 채팅',
+              desc: '4층 차단 시스템으로 외부 연락처 유출을 방지. 플랫폼 안에서만 소통.',
+            },
+            {
+              title: '합리적인 가격',
+              desc: '코치가 직접 설정한 가격. 중간 마진 없이 투명하게.',
+            },
+          ].map((f) => (
+            <div key={f.title} className="bg-gray-50 rounded-2xl p-6 space-y-2">
+              <h3 className="font-semibold text-lg">{f.title}</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">{f.desc}</p>
+            </div>
+          ))}
         </div>
-      </main>
+      </section>
+
+      {/* CTA */}
+      <section className="bg-gray-900 text-white py-20 text-center space-y-4">
+        <h2 className="text-3xl font-bold">지금 바로 코치를 만나보세요</h2>
+        <p className="text-gray-400">코치 신청도 무료. 승인 후 즉시 활동 가능.</p>
+        <div className="flex gap-3 justify-center pt-2">
+          <Link
+            href="/coaches"
+            className={cn(buttonVariants({ variant: 'outline' }), 'border-white text-white hover:bg-white hover:text-gray-900')}
+          >
+            코치 둘러보기
+          </Link>
+          <Link
+            href="/signup"
+            className={cn(buttonVariants(), 'bg-white text-gray-900 hover:bg-gray-100')}
+          >
+            회원가입
+          </Link>
+        </div>
+      </section>
+
+      <footer className="text-center py-8 text-sm text-gray-400">
+        © 2026 Cuepath. All rights reserved.
+      </footer>
     </div>
-  );
+  )
 }

@@ -24,6 +24,8 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
         <span className="font-semibold text-lg">Cuepath 관리자</span>
         <nav className="flex gap-4 text-sm text-gray-500">
           <a href="/admin/coaches" className="hover:text-gray-900">코치 승인</a>
+          <a href="/admin/reports" className="hover:text-gray-900">신고 처리</a>
+          <a href="/admin/users" className="hover:text-gray-900">사용자 관리</a>
         </nav>
       </header>
       <main className="max-w-5xl mx-auto px-6 py-8">{children}</main>

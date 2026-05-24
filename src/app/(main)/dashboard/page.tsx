@@ -36,11 +36,14 @@ export default async function DashboardPage() {
           <p className="text-sm text-gray-400 mt-1">승인된 코치 목록 보기</p>
         </Link>
 
-        {/* 내 세션 — Sprint 3 */}
-        <div className="bg-white rounded-xl border p-6 text-gray-400">
-          <p className="font-medium text-gray-700">내 세션</p>
-          <p className="text-sm mt-1">준비 중 (Sprint 3)</p>
-        </div>
+        {/* 내 세션 */}
+        <Link
+          href="/sessions"
+          className="bg-white rounded-xl border p-6 hover:shadow-md transition-shadow"
+        >
+          <p className="font-medium">내 세션</p>
+          <p className="text-sm text-gray-400 mt-1">예약·진행·완료 세션 보기</p>
+        </Link>
 
         {/* 코치 신청 또는 상태 */}
         {coachRow ? (
