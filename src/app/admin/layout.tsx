@@ -1,0 +1,32 @@
+import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
+
+interface AdminLayoutProps {
+  children: React.ReactNode
+}
+
+export default async function AdminLayout({ children }: AdminLayoutProps) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  if (profile?.role !== 'admin') redirect('/dashboard')
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <header className="bg-white border-b px-6 py-4 flex items-center gap-4">
+        <span className="font-semibold text-lg">Cuepath 관리자</span>
+        <nav className="flex gap-4 text-sm text-gray-500">
+          <a href="/admin/coaches" className="hover:text-gray-900">코치 승인</a>
+        </nav>
+      </header>
+      <main className="max-w-5xl mx-auto px-6 py-8">{children}</main>
+    </div>
+  )
+}
