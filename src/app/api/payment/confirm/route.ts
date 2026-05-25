@@ -11,22 +11,23 @@ export async function POST(request: Request) {
 
   const supabase = createAdminClient()
 
-  // DB에서 결제 정보 검증 (금액 위변조 방지)
+  // DB 금액 검증
   const { data: payment } = await supabase
     .from('payments')
     .select('id, amount, status, session_id')
     .eq('toss_order_id', orderId)
     .single()
 
-  if (!payment) {
-    return NextResponse.json({ error: '결제 정보를 찾을 수 없습니다' }, { status: 404 })
-  }
-  if (payment.status === 'paid') {
-    return NextResponse.json({ error: '이미 처리된 결제입니다' }, { status: 409 })
-  }
-  if (payment.amount !== amount) {
-    return NextResponse.json({ error: '결제 금액 불일치' }, { status: 400 })
-  }
+  if (!payment) return NextResponse.json({ error: '결제 정보를 찾을 수 없습니다' }, { status: 404 })
+  if (payment.status === 'paid') return NextResponse.json({ error: '이미 처리된 결제입니다' }, { status: 409 })
+  if (payment.amount !== amount) return NextResponse.json({ error: '결제 금액 불일치' }, { status: 400 })
+
+  // 세션에 연결된 슬롯 조회
+  const { data: session } = await supabase
+    .from('sessions')
+    .select('slot_id')
+    .eq('id', payment.session_id)
+    .single()
 
   // 토스 최종 승인
   try {
@@ -36,31 +37,27 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: msg }, { status: 400 })
   }
 
-  const now = new Date()
-  const expiresAt = new Date(now.getTime() + 60 * 60 * 1000) // +60분
+  // 결제 확정 + 세션 → requested (컨설턴트 승인 대기)
+  const [{ error: payErr }, { error: sessionErr }] = await Promise.all([
+    supabase
+      .from('payments')
+      .update({ status: 'paid', toss_payment_key: paymentKey, paid_at: new Date().toISOString() })
+      .eq('id', payment.id),
+    supabase
+      .from('sessions')
+      .update({ status: 'requested' })
+      .eq('id', payment.session_id),
+  ])
 
-  // 트랜잭션: payment 확정 + session 확정 + chat_room 생성
-  const [{ error: payErr }, { error: sessionErr }, { data: room, error: roomErr }] =
-    await Promise.all([
-      supabase
-        .from('payments')
-        .update({ status: 'paid', toss_payment_key: paymentKey, paid_at: now.toISOString() })
-        .eq('id', payment.id),
-      supabase
-        .from('sessions')
-        .update({ status: 'confirmed' })
-        .eq('id', payment.session_id),
-      supabase
-        .from('chat_rooms')
-        .insert({ session_id: payment.session_id, expires_at: expiresAt.toISOString() })
-        .select('id')
-        .single(),
-    ])
-
-  if (payErr || sessionErr || roomErr) {
-    console.error('DB 업데이트 실패', { payErr, sessionErr, roomErr })
+  if (payErr || sessionErr) {
+    console.error('DB 업데이트 실패', { payErr, sessionErr })
     return NextResponse.json({ error: 'DB 업데이트 실패' }, { status: 500 })
   }
 
-  return NextResponse.json({ roomId: room!.id })
+  // 슬롯 booked 처리
+  if (session?.slot_id) {
+    await supabase.from('coach_slots').update({ status: 'booked' }).eq('id', session.slot_id)
+  }
+
+  return NextResponse.json({ sessionId: payment.session_id })
 }

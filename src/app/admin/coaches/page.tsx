@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { Button } from '@/components/ui/button'
 import { approveCoach, rejectCoach } from '../actions'
@@ -43,7 +44,9 @@ export default async function AdminCoachesPage() {
               <div key={coach.id} className="bg-white rounded-xl border p-6 space-y-3">
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="font-medium">{profile?.full_name ?? '-'}</p>
+                    <Link href={`/admin/coaches/${coach.id}`} className="font-medium hover:underline">
+                      {profile?.full_name ?? '-'}
+                    </Link>
                     <p className="text-sm text-gray-500">{profile?.email}</p>
                   </div>
                   <p className="text-sm font-medium">{coach.hourly_rate.toLocaleString()}원</p>

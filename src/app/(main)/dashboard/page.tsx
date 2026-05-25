@@ -19,6 +19,17 @@ export default async function DashboardPage() {
     .eq('id', user!.id)
     .maybeSingle()
 
+  // 컨설턴트인 경우: 대기 중 예약 요청 수
+  let pendingRequestCount = 0
+  if (coachRow?.is_approved) {
+    const { count } = await supabase
+      .from('sessions')
+      .select('id', { count: 'exact', head: true })
+      .eq('coach_id', user!.id)
+      .eq('status', 'requested')
+    pendingRequestCount = count ?? 0
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -27,13 +38,13 @@ export default async function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* 코치 찾기 */}
+        {/* 컨설턴트 찾기 */}
         <Link
           href="/coaches"
           className="bg-white rounded-xl border p-6 hover:shadow-md transition-shadow"
         >
-          <p className="font-medium">코치 찾기</p>
-          <p className="text-sm text-gray-400 mt-1">승인된 코치 목록 보기</p>
+          <p className="font-medium">컨설턴트 찾기</p>
+          <p className="text-sm text-gray-400 mt-1">승인된 컨설턴트 목록 보기</p>
         </Link>
 
         {/* 내 세션 */}
@@ -45,28 +56,37 @@ export default async function DashboardPage() {
           <p className="text-sm text-gray-400 mt-1">예약·진행·완료 세션 보기</p>
         </Link>
 
-        {/* 코치 신청 또는 상태 */}
+        {/* 컨설턴트 신청 / 현황 / 캘린더 */}
         {coachRow ? (
-          <div className="bg-white rounded-xl border p-6">
-            <p className="font-medium">코치 신청 현황</p>
-            <p className="text-sm mt-1">
-              {coachRow.is_approved ? (
-                <span className="text-green-600">승인 완료</span>
-              ) : (
-                <span className="text-yellow-600">심사 중</span>
+          coachRow.is_approved ? (
+            <Link
+              href="/coach/schedule"
+              className="bg-white rounded-xl border p-6 hover:shadow-md transition-shadow relative"
+            >
+              <p className="font-medium">내 캘린더 관리</p>
+              <p className="text-sm text-gray-400 mt-1">슬롯 등록 및 예약 관리</p>
+              {pendingRequestCount > 0 && (
+                <span className="absolute top-4 right-4 text-xs bg-yellow-400 text-white font-bold px-2 py-0.5 rounded-full">
+                  {pendingRequestCount}
+                </span>
               )}
-            </p>
-          </div>
+            </Link>
+          ) : (
+            <div className="bg-white rounded-xl border p-6">
+              <p className="font-medium">컨설턴트 신청 현황</p>
+              <p className="text-sm mt-1 text-yellow-600">심사 중</p>
+            </div>
+          )
         ) : (
           <Link
             href="/coaches/apply"
             className={cn(
               buttonVariants({ variant: 'outline' }),
-              'bg-white rounded-xl border p-6 h-auto flex-col items-start justify-start hover:shadow-md transition-shadow'
+              'bg-white rounded-xl border p-6 h-auto flex-col items-start justify-start hover:shadow-md transition-shadow',
             )}
           >
-            <p className="font-medium">코치 신청</p>
-            <p className="text-sm text-gray-400 mt-1">코치로 활동하기</p>
+            <p className="font-medium">컨설턴트 신청</p>
+            <p className="text-sm text-gray-400 mt-1">컨설턴트로 활동하기</p>
           </Link>
         )}
       </div>

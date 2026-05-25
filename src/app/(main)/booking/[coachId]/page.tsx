@@ -1,6 +1,6 @@
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { PaymentButton } from '@/components/booking/PaymentButton'
+import { BookingForm } from '@/components/booking/BookingForm'
 
 interface BookingPageProps {
   params: Promise<{ coachId: string }>
@@ -10,15 +10,11 @@ export default async function BookingPage({ params }: BookingPageProps) {
   const { coachId } = await params
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
 
   const { data: coach } = await supabase
     .from('coaches')
-    .select(`
-      id,
-      hourly_rate,
-      domains,
-      profiles!inner(full_name)
-    `)
+    .select(`id, domains, profiles!inner(full_name)`)
     .eq('id', coachId)
     .eq('is_approved', true)
     .single()
@@ -26,43 +22,41 @@ export default async function BookingPage({ params }: BookingPageProps) {
   if (!coach) notFound()
 
   const profile = Array.isArray(coach.profiles) ? coach.profiles[0] : coach.profiles
-  const coachName = profile?.full_name ?? '코치'
+  const coachName = profile?.full_name ?? '컨설턴트'
+
+  // 컨설턴트 가용 요일·시간 규칙
+  const { data: availability } = await supabase
+    .from('coach_availability')
+    .select('day_of_week, time_hhmm')
+    .eq('coach_id', coachId)
+    .order('day_of_week')
+    .order('time_hhmm')
+
+  // 이미 예약된 세션의 scheduled_at (중복 예약 방지)
+  const { data: bookedSessions } = await supabase
+    .from('sessions')
+    .select('scheduled_at')
+    .eq('coach_id', coachId)
+    .in('status', ['pending', 'requested', 'confirmed'])
+    .gte('scheduled_at', new Date().toISOString())
+
+  const bookedDatetimes = (bookedSessions ?? [])
+    .map((s) => s.scheduled_at)
+    .filter(Boolean) as string[]
 
   return (
     <div className="max-w-md space-y-6">
-      <h1 className="text-2xl font-semibold">세션 예약</h1>
-
-      {/* 예약 요약 */}
-      <div className="bg-white rounded-xl border divide-y">
-        <div className="px-5 py-4 flex justify-between">
-          <span className="text-gray-500">코치</span>
-          <span className="font-medium">{coachName}</span>
-        </div>
-        <div className="px-5 py-4 flex justify-between">
-          <span className="text-gray-500">도메인</span>
-          <span className="text-sm">{coach.domains.join(', ')}</span>
-        </div>
-        <div className="px-5 py-4 flex justify-between">
-          <span className="text-gray-500">세션 시간</span>
-          <span>60분</span>
-        </div>
-        <div className="px-5 py-4 flex justify-between">
-          <span className="text-gray-500 font-medium">결제 금액</span>
-          <span className="font-semibold text-lg">
-            {coach.hourly_rate.toLocaleString()}원
-          </span>
-        </div>
+      <div>
+        <h1 className="text-2xl font-semibold">세션 예약</h1>
+        <p className="text-sm text-gray-500 mt-1">{coachName} 컨설턴트</p>
       </div>
 
-      <p className="text-sm text-gray-400">
-        결제 완료 후 즉시 채팅방이 열립니다. 채팅방은 60분 후 자동으로 만료됩니다.
-      </p>
-
-      <PaymentButton
+      <BookingForm
         coachId={coachId}
         coachName={coachName}
-        amount={coach.hourly_rate}
-        customerKey={user!.id}
+        availability={availability ?? []}
+        bookedDatetimes={bookedDatetimes}
+        userId={user.id}
       />
     </div>
   )

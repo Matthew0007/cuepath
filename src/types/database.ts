@@ -12,31 +12,6 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       chat_rooms: {
@@ -67,6 +42,70 @@ export type Database = {
             columns: ["session_id"]
             isOneToOne: true
             referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coach_availability: {
+        Row: {
+          coach_id: string
+          created_at: string
+          day_of_week: number
+          id: string
+          time_hhmm: string
+        }
+        Insert: {
+          coach_id: string
+          created_at?: string
+          day_of_week: number
+          id?: string
+          time_hhmm: string
+        }
+        Update: {
+          coach_id?: string
+          created_at?: string
+          day_of_week?: number
+          id?: string
+          time_hhmm?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coach_availability_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coaches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coach_slots: {
+        Row: {
+          coach_id: string
+          created_at: string
+          id: string
+          start_at: string
+          status: string
+        }
+        Insert: {
+          coach_id: string
+          created_at?: string
+          id?: string
+          start_at: string
+          status?: string
+        }
+        Update: {
+          coach_id?: string
+          created_at?: string
+          id?: string
+          start_at?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coach_slots_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coaches"
             referencedColumns: ["id"]
           },
         ]
@@ -224,6 +263,7 @@ export type Database = {
           id: string
           level: Database["public"]["Enums"]["penalty_level"]
           reason: string
+          starts_at: string | null
           user_id: string
         }
         Insert: {
@@ -232,6 +272,7 @@ export type Database = {
           id?: string
           level: Database["public"]["Enums"]["penalty_level"]
           reason: string
+          starts_at?: string | null
           user_id: string
         }
         Update: {
@@ -240,6 +281,7 @@ export type Database = {
           id?: string
           level?: Database["public"]["Enums"]["penalty_level"]
           reason?: string
+          starts_at?: string | null
           user_id?: string
         }
         Relationships: [
@@ -397,6 +439,8 @@ export type Database = {
           duration_minutes: number
           id: string
           price: number
+          scheduled_at: string | null
+          slot_id: string | null
           status: Database["public"]["Enums"]["session_status"]
           updated_at: string
         }
@@ -407,6 +451,8 @@ export type Database = {
           duration_minutes?: number
           id?: string
           price: number
+          scheduled_at?: string | null
+          slot_id?: string | null
           status?: Database["public"]["Enums"]["session_status"]
           updated_at?: string
         }
@@ -417,6 +463,8 @@ export type Database = {
           duration_minutes?: number
           id?: string
           price?: number
+          scheduled_at?: string | null
+          slot_id?: string | null
           status?: Database["public"]["Enums"]["session_status"]
           updated_at?: string
         }
@@ -433,6 +481,13 @@ export type Database = {
             columns: ["coachee_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sessions_slot_id_fkey"
+            columns: ["slot_id"]
+            isOneToOne: false
+            referencedRelation: "coach_slots"
             referencedColumns: ["id"]
           },
         ]
@@ -454,6 +509,7 @@ export type Database = {
         | "completed"
         | "cancelled"
         | "refunded"
+        | "requested"
       user_role: "coachee" | "coach" | "admin"
     }
     CompositeTypes: {
@@ -580,9 +636,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
       payment_status: ["pending", "paid", "cancelled", "refunded"],
@@ -594,6 +647,7 @@ export const Constants = {
         "completed",
         "cancelled",
         "refunded",
+        "requested",
       ],
       user_role: ["coachee", "coach", "admin"],
     },

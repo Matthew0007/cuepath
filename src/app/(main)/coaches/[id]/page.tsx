@@ -41,7 +41,7 @@ export default async function CoachPage({ params }: CoachPageProps) {
           {profile?.full_name?.[0] ?? '?'}
         </div>
         <div className="flex-1">
-          <h1 className="text-2xl font-semibold">{profile?.full_name ?? '코치'}</h1>
+          <h1 className="text-2xl font-semibold">{profile?.full_name ?? '컨설턴트'}</h1>
           <p className="text-gray-500 mt-1">
             ★ {coach.rating.toFixed(1)} · 후기 {coach.review_count}개 · {coach.hourly_rate.toLocaleString()}원/회
           </p>
@@ -61,7 +61,7 @@ export default async function CoachPage({ params }: CoachPageProps) {
       {/* 소개 */}
       {coach.bio && (
         <div>
-          <h2 className="font-medium mb-2">코치 소개</h2>
+          <h2 className="font-medium mb-2">컨설턴트 소개</h2>
           <p className="text-gray-700 whitespace-pre-line">{coach.bio}</p>
         </div>
       )}

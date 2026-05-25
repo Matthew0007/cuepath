@@ -26,7 +26,7 @@ export function CoachCard({
         <CardHeader className="pb-2">
           <div className="flex items-start justify-between">
             <div>
-              <p className="font-semibold">{fullName ?? '코치'}</p>
+              <p className="font-semibold">{fullName ?? '컨설턴트'}</p>
               <p className="text-sm text-gray-500 mt-0.5">
                 ★ {rating.toFixed(1)} ({reviewCount}개 후기)
               </p>

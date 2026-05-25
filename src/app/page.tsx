@@ -1,21 +1,65 @@
 import Link from 'next/link'
+import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { buttonVariants } from '@/components/ui/button'
+import { AvatarImage } from '@/components/ui/avatar-image'
 import { cn } from '@/lib/utils'
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  let profile: { full_name: string | null; avatar_url: string | null } | null = null
+  let avatarSignedUrl: string | null = null
+
+  if (user) {
+    const { data } = await supabase
+      .from('profiles')
+      .select('full_name, avatar_url')
+      .eq('id', user.id)
+      .single()
+    profile = data
+
+    if (data?.avatar_url) {
+      const admin = createAdminClient()
+      const { data: signed } = await admin.storage
+        .from('avatars')
+        .createSignedUrl(data.avatar_url, 3600)
+      avatarSignedUrl = signed?.signedUrl ?? null
+    }
+  }
+
   return (
     <div className="min-h-screen bg-white">
       {/* 헤더 */}
       <header className="border-b px-6 py-4 flex items-center justify-between max-w-5xl mx-auto">
         <span className="font-bold text-xl">Cuepath</span>
-        <div className="flex items-center gap-3">
-          <Link href="/login" className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }))}>
-            로그인
-          </Link>
-          <Link href="/signup" className={cn(buttonVariants({ size: 'sm' }))}>
-            시작하기
-          </Link>
-        </div>
+
+        {user ? (
+          <div className="flex items-center gap-3">
+            <Link
+              href="/profile"
+              className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+            >
+              <AvatarImage src={avatarSignedUrl} name={profile?.full_name} size={32} />
+              <span className="text-sm font-medium text-gray-700">
+                {profile?.full_name ?? user.email}
+              </span>
+            </Link>
+            <Link href="/dashboard" className={cn(buttonVariants({ size: 'sm' }))}>
+              대시보드
+            </Link>
+          </div>
+        ) : (
+          <div className="flex items-center gap-3">
+            <Link href="/login" className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }))}>
+              로그인
+            </Link>
+            <Link href="/signup" className={cn(buttonVariants({ size: 'sm' }))}>
+              시작하기
+            </Link>
+          </div>
+        )}
       </header>
 
       {/* 히어로 */}
@@ -28,8 +72,8 @@ export default function LandingPage() {
           취업·이직 전문 컨설턴트와 1:1 채팅 코칭.<br />
           결제 후 즉시 시작, 60분 집중 세션.
         </p>
-        <Link href="/signup" className={cn(buttonVariants({ size: 'lg' }), 'px-8')}>
-          무료로 시작하기
+        <Link href={user ? '/coaches' : '/signup'} className={cn(buttonVariants({ size: 'lg' }), 'px-8')}>
+          {user ? '컨설턴트 찾기' : '무료로 시작하기'}
         </Link>
       </section>
 
@@ -70,10 +114,10 @@ export default function LandingPage() {
             컨설턴트 둘러보기
           </Link>
           <Link
-            href="/signup"
+            href={user ? '/dashboard' : '/signup'}
             className={cn(buttonVariants(), 'bg-white text-gray-900 hover:bg-gray-100')}
           >
-            회원가입
+            {user ? '대시보드로 이동' : '회원가입'}
           </Link>
         </div>
       </section>

@@ -27,9 +27,9 @@ export default function CoachApplyPage() {
     <div className="max-w-lg">
       <Card>
         <CardHeader>
-          <CardTitle>코치 신청</CardTitle>
+          <CardTitle>컨설턴트 신청</CardTitle>
           <CardDescription>
-            심사 후 승인되면 코치로 활동할 수 있습니다. (1~3 영업일 소요)
+            심사 후 승인되면 컨설턴트로 활동할 수 있습니다. (1~3 영업일 소요)
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
@@ -42,7 +42,7 @@ export default function CoachApplyPage() {
 
             {/* 자기소개 */}
             <div className="space-y-2">
-              <Label htmlFor="bio">코치 소개</Label>
+              <Label htmlFor="bio">컨설턴트 소개</Label>
               <textarea
                 id="bio"
                 name="bio"
@@ -82,7 +82,7 @@ export default function CoachApplyPage() {
             </div>
 
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? '신청 중...' : '코치 신청하기'}
+              {loading ? '신청 중...' : '컨설턴트 신청하기'}
             </Button>
           </CardContent>
         </form>

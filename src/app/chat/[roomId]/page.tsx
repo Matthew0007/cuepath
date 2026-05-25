@@ -40,8 +40,8 @@ export default async function ChatPage({ params }: ChatPageProps) {
 
   // 상대방 이름
   const otherUserName = isCoach
-    ? ((Array.isArray(session.profiles) ? session.profiles[0] : session.profiles)?.full_name ?? '코치이')
-    : ((Array.isArray(session.coaches?.profiles) ? session.coaches.profiles[0] : session.coaches?.profiles)?.full_name ?? '코치')
+    ? ((Array.isArray(session.profiles) ? session.profiles[0] : session.profiles)?.full_name ?? '의뢰인')
+    : ((Array.isArray(session.coaches?.profiles) ? session.coaches.profiles[0] : session.coaches?.profiles)?.full_name ?? '컨설턴트')
 
   // 초기 메시지 로드 (최근 100개)
   const { data: initialMessages } = await supabase

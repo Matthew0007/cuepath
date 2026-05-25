@@ -19,7 +19,7 @@ function FailContent() {
           다시 시도
         </Button>
         <Button variant="ghost" onClick={() => router.push('/coaches')}>
-          코치 목록으로
+          컨설턴트 목록으로
         </Button>
       </div>
     </div>
