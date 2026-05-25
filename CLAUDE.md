@@ -118,7 +118,6 @@ NEXT_PUBLIC_SITE_URL=https://cuepath.vercel.app
 - 서버 컴포넌트 우선, 클라이언트 컴포넌트는 'use client' 필요 시만
 - DB 변경은 supabase/migrations/ 에 SQL 파일로 기록
 - 환경변수는 .env.local (Git 커밋 절대 금지)
-- main 브랜치 직접 push 금지 → feature 브랜치 → PR → 머지
 - 함수형 컴포넌트만 사용
 - props 타입은 interface로 정의
 - 비즈니스 로직은 lib/ 에 분리
