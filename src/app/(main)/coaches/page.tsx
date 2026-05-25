@@ -50,7 +50,7 @@ export default async function CoachesPage({ searchParams }: CoachesPageProps) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">코치 찾기</h1>
+        <h1 className="text-2xl font-semibold">컨설턴트 찾기</h1>
         <span className="text-sm text-gray-500">{coaches?.length ?? 0}명</span>
       </div>
 
@@ -80,7 +80,7 @@ export default async function CoachesPage({ searchParams }: CoachesPageProps) {
         </div>
       ) : (
         <div className="text-center py-20 text-gray-400">
-          <p>조건에 맞는 코치가 없습니다.</p>
+          <p>조건에 맞는 컨설턴트가 없습니다.</p>
         </div>
       )}
     </div>

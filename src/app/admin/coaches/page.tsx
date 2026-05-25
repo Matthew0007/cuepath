@@ -26,7 +26,7 @@ export default async function AdminCoachesPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-semibold">코치 승인 관리</h1>
+        <h1 className="text-2xl font-semibold">컨설턴트 승인 관리</h1>
         <p className="text-sm text-gray-500 mt-1">
           대기 {pending?.length ?? 0}명 · 승인 {approved?.length ?? 0}명
         </p>
@@ -82,7 +82,7 @@ export default async function AdminCoachesPage() {
         </div>
       ) : (
         <div className="text-center py-20 text-gray-400">
-          <p>대기 중인 코치 신청이 없습니다.</p>
+          <p>대기 중인 컨설턴트 신청이 없습니다.</p>
         </div>
       )}
     </div>

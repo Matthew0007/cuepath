@@ -22,10 +22,10 @@ export default function LandingPage() {
       <section className="max-w-3xl mx-auto px-6 py-24 text-center space-y-6">
         <h1 className="text-5xl font-bold leading-tight tracking-tight">
           커리어의 다음 챕터,<br />
-          검증된 코치와 함께
+          검증된 컨설턴트와 함께
         </h1>
         <p className="text-xl text-gray-500">
-          취업·이직 전문 코치와 1:1 채팅 코칭.<br />
+          취업·이직 전문 컨설턴트와 1:1 채팅 코칭.<br />
           결제 후 즉시 시작, 60분 집중 세션.
         </p>
         <Link href="/signup" className={cn(buttonVariants({ size: 'lg' }), 'px-8')}>
@@ -38,7 +38,7 @@ export default function LandingPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
             {
-              title: '검증된 코치',
+              title: '검증된 컨설턴트',
               desc: 'Matthew가 직접 검증한 커리어 전문가. IT·마케팅·금융·스타트업 등 10개 도메인.',
             },
             {
@@ -47,7 +47,7 @@ export default function LandingPage() {
             },
             {
               title: '합리적인 가격',
-              desc: '코치가 직접 설정한 가격. 중간 마진 없이 투명하게.',
+              desc: '컨설턴트가 직접 설정한 가격. 중간 마진 없이 투명하게.',
             },
           ].map((f) => (
             <div key={f.title} className="bg-gray-50 rounded-2xl p-6 space-y-2">
@@ -60,14 +60,14 @@ export default function LandingPage() {
 
       {/* CTA */}
       <section className="bg-gray-900 text-white py-20 text-center space-y-4">
-        <h2 className="text-3xl font-bold">지금 바로 코치를 만나보세요</h2>
-        <p className="text-gray-400">코치 신청도 무료. 승인 후 즉시 활동 가능.</p>
+        <h2 className="text-3xl font-bold">지금 바로 컨설턴트를 만나보세요</h2>
+        <p className="text-gray-400">컨설턴트 신청도 무료. 승인 후 즉시 활동 가능.</p>
         <div className="flex gap-3 justify-center pt-2">
           <Link
             href="/coaches"
             className={cn(buttonVariants({ variant: 'outline' }), 'border-white text-white hover:bg-white hover:text-gray-900')}
           >
-            코치 둘러보기
+            컨설턴트 둘러보기
           </Link>
           <Link
             href="/signup"
