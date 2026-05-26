@@ -143,7 +143,8 @@ NEXT_PUBLIC_SITE_URL=https://cuepath.vercel.app
 | 3 | 완료 | 결제·예약·채팅방 생성 |
 | 4 | 완료 | 채팅 Realtime·차단 4층·시간 만료 |
 | 5 | 완료 | 후기·관리자 콘솔·베타 오픈 |
-| 6 | 진행 중 | 캘린더 기반 예약·회원 관리·UI 개선 |
+| 6 | 완료 | 캘린더 기반 예약·회원 관리·UI 개선·LinkedIn 리디자인 |
+| 7 | 진행 중 | 알림 시스템·세션 수락/거부·즐겨찾기·이메일 알림 |
 
 ---
 
@@ -230,6 +231,11 @@ NEXT_PUBLIC_SITE_URL=https://cuepath.vercel.app
 - AppNav는 client component (usePathname 사용) — layout.tsx는 server component 유지
 - reviews 테이블: content 컬럼 사용 (comment 없음)
 - 모든 작업 main 브랜치 직접 push 허용 (2026-05-26 Matthew 결정)
+- 이메일 알림: Resend 라이브러리 사용, RESEND_API_KEY + RESEND_FROM_EMAIL 환경변수 필요. 커스텀 도메인 Resend 인증 필요 (cuepath.kr 등 도메인 구매 후 설정)
+- 인앱 알림: notifications 테이블 (DB), GET /api/notifications 로 목록조회, POST /api/notifications 로 전체읽음, AppNav NotificationBell 컴포넌트로 표시
+- 세션 수락/거부: confirmSession / rejectSession server action (sessions/actions.ts), 세션페이지 + 코치대시보드 양쪽에서 인라인 처리 가능
+- 즐겨찾기: coach_favorites 테이블, FavoriteButton client 컴포넌트 (optimistic update), /coaches 페이지에서 하트 토글, 대시보드 즐겨찾기 섹션
+- DB migrations 실행 필요 (Supabase SQL Editor): 20260526000002_coach_application_docs.sql, 20260526000003_notifications_favorites.sql
 
 ---
 
