@@ -120,7 +120,10 @@ export type Database = {
           hourly_rate: number
           id: string
           is_approved: boolean
+          linkedin_url: string | null
+          other_profile_url: string | null
           rating: number
+          resume_path: string | null
           review_count: number
           updated_at: string
         }
@@ -133,7 +136,10 @@ export type Database = {
           hourly_rate?: number
           id: string
           is_approved?: boolean
+          linkedin_url?: string | null
+          other_profile_url?: string | null
           rating?: number
+          resume_path?: string | null
           review_count?: number
           updated_at?: string
         }
@@ -146,7 +152,10 @@ export type Database = {
           hourly_rate?: number
           id?: string
           is_approved?: boolean
+          linkedin_url?: string | null
+          other_profile_url?: string | null
           rating?: number
+          resume_path?: string | null
           review_count?: number
           updated_at?: string
         }

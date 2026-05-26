@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
+import { ExternalLink, FileText } from 'lucide-react'
 import {
   giveWarning,
   giveSuspension,
@@ -55,10 +56,20 @@ export default async function AdminCoachDetailPage({ params }: PageProps) {
     .from('coaches')
     .select(`
       id, bio, domains, hourly_rate, rating, review_count, is_approved, approved_at, created_at,
+      linkedin_url, other_profile_url, resume_path,
       profiles!inner(full_name, email, role, created_at)
     `)
     .eq('id', id)
     .single()
+
+  // 이력서 signed URL
+  let resumeSignedUrl: string | null = null
+  if (coach?.resume_path) {
+    const { data: signed } = await db.storage
+      .from('coach-resumes')
+      .createSignedUrl(coach.resume_path, 3600)
+    resumeSignedUrl = signed?.signedUrl ?? null
+  }
 
   if (!coach) notFound()
 
@@ -139,6 +150,52 @@ export default async function AdminCoachDetailPage({ params }: PageProps) {
         </div>
         {coach.bio && <p className="mt-3 text-gray-600 border-t pt-3">{coach.bio}</p>}
       </section>
+
+      {/* 심사 자료 */}
+      {(coach.linkedin_url || coach.other_profile_url || resumeSignedUrl) && (
+        <section className="bg-white border rounded-xl p-6 space-y-3">
+          <h2 className="font-semibold text-base">심사 자료</h2>
+          <p className="text-xs text-gray-400">신청자가 제출한 자료입니다. 외부 링크는 새 탭에서 열립니다.</p>
+          <div className="flex flex-wrap gap-2 pt-1">
+            {coach.linkedin_url && (
+              <a
+                href={coach.linkedin_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-sm bg-[#EAF0F8] text-[#0A66C2] px-4 py-2 rounded-full hover:bg-[#0A66C2] hover:text-white transition-colors font-medium"
+              >
+                <ExternalLink className="w-4 h-4" />
+                LinkedIn 프로필
+              </a>
+            )}
+            {coach.other_profile_url && (
+              <a
+                href={coach.other_profile_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-sm bg-gray-100 text-gray-700 px-4 py-2 rounded-full hover:bg-gray-200 transition-colors font-medium"
+              >
+                <ExternalLink className="w-4 h-4" />
+                기타 프로필
+              </a>
+            )}
+            {resumeSignedUrl && (
+              <a
+                href={resumeSignedUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-sm bg-green-50 text-green-700 px-4 py-2 rounded-full hover:bg-green-100 transition-colors font-medium"
+              >
+                <FileText className="w-4 h-4" />
+                이력서 PDF 열기
+              </a>
+            )}
+          </div>
+          {!coach.linkedin_url && !coach.other_profile_url && !resumeSignedUrl && (
+            <p className="text-sm text-gray-400">제출된 자료가 없습니다.</p>
+          )}
+        </section>
+      )}
 
       {/* 페널티 부여 */}
       <section className="space-y-4">
