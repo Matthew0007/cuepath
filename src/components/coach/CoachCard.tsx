@@ -1,5 +1,6 @@
 import Link from 'next/link'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Star, ChevronRight } from 'lucide-react'
+import { AvatarImage } from '@/components/ui/avatar-image'
 
 interface CoachCardProps {
   id: string
@@ -9,49 +10,56 @@ interface CoachCardProps {
   hourlyRate: number
   rating: number
   reviewCount: number
+  avatarUrl?: string | null
 }
 
 export function CoachCard({
-  id,
-  fullName,
-  bio,
-  domains,
-  hourlyRate,
-  rating,
-  reviewCount,
+  id, fullName, bio, domains, hourlyRate, rating, reviewCount, avatarUrl,
 }: CoachCardProps) {
   return (
     <Link href={`/coaches/${id}`}>
-      <Card className="h-full hover:shadow-md transition-shadow cursor-pointer">
-        <CardHeader className="pb-2">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="font-semibold">{fullName ?? '컨설턴트'}</p>
-              <p className="text-sm text-gray-500 mt-0.5">
-                ★ {rating.toFixed(1)} ({reviewCount}개 후기)
-              </p>
+      <div className="bg-white rounded-xl border border-black/10 shadow-sm hover:shadow-md transition-shadow p-5 h-full flex flex-col">
+        {/* 헤더 */}
+        <div className="flex items-start gap-3">
+          <AvatarImage src={avatarUrl ?? null} name={fullName} size={48} />
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-gray-900 text-sm">{fullName ?? '컨설턴트'}</p>
+            <div className="flex items-center gap-1 mt-0.5">
+              <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+              <span className="text-xs font-medium text-gray-700">{rating.toFixed(1)}</span>
+              <span className="text-xs text-gray-400">({reviewCount}개 후기)</span>
             </div>
-            <span className="text-sm font-medium text-gray-700">
-              {hourlyRate.toLocaleString()}원
+          </div>
+          <span className="text-xs font-semibold text-[#0A66C2] shrink-0">
+            {hourlyRate.toLocaleString()}원
+          </span>
+        </div>
+
+        {/* 소개 */}
+        {bio && (
+          <p className="text-xs text-gray-500 mt-3 line-clamp-2 leading-relaxed flex-1">{bio}</p>
+        )}
+
+        {/* 도메인 태그 */}
+        <div className="flex flex-wrap gap-1 mt-3">
+          {domains.slice(0, 3).map((d) => (
+            <span key={d} className="text-[10px] bg-[#EAF0F8] text-[#0A66C2] px-2 py-0.5 rounded-full font-medium">
+              {d}
             </span>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {bio && (
-            <p className="text-sm text-gray-600 line-clamp-2">{bio}</p>
+          ))}
+          {domains.length > 3 && (
+            <span className="text-[10px] text-gray-400">+{domains.length - 3}</span>
           )}
-          <div className="flex flex-wrap gap-1">
-            {domains.map((d) => (
-              <span
-                key={d}
-                className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full"
-              >
-                {d}
-              </span>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+        </div>
+
+        {/* CTA */}
+        <div className="mt-4 pt-3 border-t border-black/5 flex items-center justify-between">
+          <span className="text-xs text-gray-400">세션 예약 가능</span>
+          <span className="flex items-center gap-0.5 text-xs text-[#0A66C2] font-medium">
+            프로필 보기 <ChevronRight className="w-3 h-3" />
+          </span>
+        </div>
+      </div>
     </Link>
   )
 }

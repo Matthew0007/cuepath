@@ -19,12 +19,13 @@ export function AvatarImage({ src, name, size = 32, className = '' }: AvatarImag
     )
   }
 
+  const initial = name ? name.charAt(0).toUpperCase() : '?'
   return (
     <div
-      style={{ width: size, height: size, fontSize: size * 0.55 }}
-      className={`rounded-full bg-white border border-gray-200 flex items-center justify-center shrink-0 ${className}`}
+      style={{ width: size, height: size, fontSize: size * 0.38 }}
+      className={`rounded-full bg-gradient-to-br from-[#0A66C2] to-[#004182] flex items-center justify-center shrink-0 text-white font-bold ${className}`}
     >
-      👤
+      {initial}
     </div>
   )
 }
