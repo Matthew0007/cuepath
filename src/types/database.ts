@@ -114,6 +114,7 @@ export type Database = {
         Row: {
           approved_at: string | null
           bio: string | null
+          career_history: string | null
           created_at: string
           domains: string[]
           hourly_rate: number
@@ -126,6 +127,7 @@ export type Database = {
         Insert: {
           approved_at?: string | null
           bio?: string | null
+          career_history?: string | null
           created_at?: string
           domains?: string[]
           hourly_rate?: number
@@ -138,6 +140,7 @@ export type Database = {
         Update: {
           approved_at?: string | null
           bio?: string | null
+          career_history?: string | null
           created_at?: string
           domains?: string[]
           hourly_rate?: number
@@ -297,27 +300,33 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          career_bio: string | null
           created_at: string
           email: string
           full_name: string | null
+          headline: string | null
           id: string
           role: Database["public"]["Enums"]["user_role"]
           updated_at: string
         }
         Insert: {
           avatar_url?: string | null
+          career_bio?: string | null
           created_at?: string
           email: string
           full_name?: string | null
+          headline?: string | null
           id: string
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
         }
         Update: {
           avatar_url?: string | null
+          career_bio?: string | null
           created_at?: string
           email?: string
           full_name?: string | null
+          headline?: string | null
           id?: string
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
