@@ -1,7 +1,8 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { cn } from '@/lib/utils'
-import { CalendarDays, MessageSquare, Star } from 'lucide-react'
+import { CalendarDays, MessageSquare, Star, CheckCircle, XCircle } from 'lucide-react'
+import { confirmSession, rejectSession } from './actions'
 
 const STATUS_LABEL: Record<string, string> = {
   pending: '결제 대기', requested: '승인 대기', confirmed: '예약 확정',
@@ -106,6 +107,28 @@ export default async function SessionsPage() {
               <span className="text-xs text-yellow-600 bg-yellow-50 border border-yellow-200 px-2 py-1 rounded-full">
                 컨설턴트 승인 대기
               </span>
+            )}
+            {isCoach && session.status === 'requested' && (
+              <div className="flex items-center gap-1.5">
+                <form action={confirmSession.bind(null, session.id)}>
+                  <button
+                    type="submit"
+                    className="flex items-center gap-1 bg-[#0A66C2] text-white text-xs font-medium px-3 py-1.5 rounded-full hover:bg-[#004182] transition-colors"
+                  >
+                    <CheckCircle className="w-3 h-3" />
+                    수락
+                  </button>
+                </form>
+                <form action={rejectSession.bind(null, session.id)}>
+                  <button
+                    type="submit"
+                    className="flex items-center gap-1 border border-red-300 text-red-500 text-xs font-medium px-3 py-1.5 rounded-full hover:bg-red-50 transition-colors"
+                  >
+                    <XCircle className="w-3 h-3" />
+                    거부
+                  </button>
+                </form>
+              </div>
             )}
             {canReview && (
               <Link

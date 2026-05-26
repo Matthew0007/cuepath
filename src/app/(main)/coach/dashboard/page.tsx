@@ -2,7 +2,8 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { cn } from '@/lib/utils'
-import { CalendarDays, ChevronRight, Star, TrendingUp, Users } from 'lucide-react'
+import { CalendarDays, ChevronRight, Star, TrendingUp, Users, CheckCircle, XCircle } from 'lucide-react'
+import { confirmSession, rejectSession } from '@/app/(main)/sessions/actions'
 
 function fmtKST(iso: string) {
   return new Date(iso).toLocaleString('ko-KR', {
@@ -150,12 +151,26 @@ export default async function CoachDashboardPage() {
                       <p className="text-xs text-gray-500 mt-0.5">{fmtKST(s.scheduled_at)} · {s.duration_minutes}분</p>
                     )}
                   </div>
-                  <Link
-                    href="/sessions"
-                    className="text-xs border border-[#0A66C2] text-[#0A66C2] px-3 py-1 rounded-full hover:bg-[#EAF0F8] transition-colors shrink-0"
-                  >
-                    처리하기
-                  </Link>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <form action={confirmSession.bind(null, s.id)}>
+                      <button
+                        type="submit"
+                        className="flex items-center gap-1 bg-[#0A66C2] text-white text-xs font-medium px-3 py-1.5 rounded-full hover:bg-[#004182] transition-colors"
+                      >
+                        <CheckCircle className="w-3 h-3" />
+                        수락
+                      </button>
+                    </form>
+                    <form action={rejectSession.bind(null, s.id)}>
+                      <button
+                        type="submit"
+                        className="flex items-center gap-1 border border-red-300 text-red-500 text-xs font-medium px-3 py-1.5 rounded-full hover:bg-red-50 transition-colors"
+                      >
+                        <XCircle className="w-3 h-3" />
+                        거부
+                      </button>
+                    </form>
+                  </div>
                 </div>
               )
             })}

@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Star, ChevronRight } from 'lucide-react'
 import { AvatarImage } from '@/components/ui/avatar-image'
+import { FavoriteButton } from './FavoriteButton'
 
 interface CoachCardProps {
   id: string
@@ -11,16 +12,22 @@ interface CoachCardProps {
   rating: number
   reviewCount: number
   avatarUrl?: string | null
+  isFavorited?: boolean
 }
 
 export function CoachCard({
-  id, fullName, bio, domains, hourlyRate, rating, reviewCount, avatarUrl,
+  id, fullName, bio, domains, hourlyRate, rating, reviewCount, avatarUrl, isFavorited = false,
 }: CoachCardProps) {
   return (
-    <Link href={`/coaches/${id}`}>
-      <div className="bg-white rounded-xl border border-black/10 shadow-sm hover:shadow-md transition-shadow p-5 h-full flex flex-col">
+    <div className="relative bg-white rounded-xl border border-black/10 shadow-sm hover:shadow-md transition-shadow h-full flex flex-col">
+      {/* 즐겨찾기 버튼 */}
+      <div className="absolute top-3 right-3 z-10">
+        <FavoriteButton coachId={id} initialFavorited={isFavorited} />
+      </div>
+
+      <Link href={`/coaches/${id}`} className="flex flex-col flex-1 p-5">
         {/* 헤더 */}
-        <div className="flex items-start gap-3">
+        <div className="flex items-start gap-3 pr-8">
           <AvatarImage src={avatarUrl ?? null} name={fullName} size={48} />
           <div className="flex-1 min-w-0">
             <p className="font-semibold text-gray-900 text-sm">{fullName ?? '컨설턴트'}</p>
@@ -59,7 +66,7 @@ export function CoachCard({
             프로필 보기 <ChevronRight className="w-3 h-3" />
           </span>
         </div>
-      </div>
-    </Link>
+      </Link>
+    </div>
   )
 }

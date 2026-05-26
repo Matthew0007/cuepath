@@ -11,6 +11,7 @@ interface CoachesPageProps { searchParams: Promise<SearchParams> }
 export default async function CoachesPage({ searchParams }: CoachesPageProps) {
   const { domain, min_rating, sort } = await searchParams
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
 
   let query = supabase
     .from('coaches')
@@ -25,6 +26,16 @@ export default async function CoachesPage({ searchParams }: CoachesPageProps) {
   else query = query.order('rating', { ascending: false })
 
   const { data: coaches } = await query
+
+  // 즐겨찾기 목록 조회
+  const favoriteSet = new Set<string>()
+  if (user) {
+    const { data: favs } = await supabase
+      .from('coach_favorites')
+      .select('coach_id')
+      .eq('user_id', user.id)
+    favs?.forEach((f) => favoriteSet.add(f.coach_id))
+  }
 
   // 아바타 signed URL
   const admin = createAdminClient()
@@ -76,6 +87,7 @@ export default async function CoachesPage({ searchParams }: CoachesPageProps) {
               rating={coach.rating}
               reviewCount={coach.review_count}
               avatarUrl={coach.avatarUrl}
+              isFavorited={favoriteSet.has(coach.id)}
             />
           ))}
         </div>

@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { createNotification } from '@/lib/notifications'
+import { sendReviewRequestEmail } from '@/lib/email'
 
 // Vercel Cron이 매 분 호출 — Authorization: Bearer <CRON_SECRET>
 export async function GET(request: Request) {
@@ -20,10 +22,40 @@ export async function GET(request: Request) {
     .select('id, session_id')
 
   if (expired && expired.length > 0) {
-    await supabase
+    const sessionIds = expired.map((r) => r.session_id)
+    await supabase.from('sessions').update({ status: 'completed' }).in('id', sessionIds)
+
+    // 코치이에게 리뷰 요청 알림
+    const { data: completedSessions } = await supabase
       .from('sessions')
-      .update({ status: 'completed' })
-      .in('id', expired.map((r) => r.session_id))
+      .select(`
+        id, coachee_id,
+        coaches!inner(profiles!inner(full_name)),
+        profiles!sessions_coachee_id_fkey!inner(full_name, email)
+      `)
+      .in('id', sessionIds)
+
+    if (completedSessions) {
+      await Promise.all(completedSessions.map(async (s) => {
+        const coachProfile = Array.isArray(s.coaches?.profiles) ? s.coaches.profiles[0] : s.coaches?.profiles
+        const coacheeProfile = Array.isArray(s.profiles) ? s.profiles[0] : s.profiles
+        await Promise.all([
+          createNotification({
+            userId: s.coachee_id,
+            type: 'review_requested',
+            title: '세션이 완료되었습니다. 후기를 남겨주세요!',
+            body: `${coachProfile?.full_name ?? '컨설턴트'}님과의 세션 후기를 작성해주세요.`,
+            link: `/sessions/${s.id}/review`,
+          }),
+          coacheeProfile?.email ? sendReviewRequestEmail({
+            coacheeEmail: coacheeProfile.email,
+            coacheeName: coacheeProfile.full_name ?? '의뢰인',
+            coachName: coachProfile?.full_name ?? '컨설턴트',
+            sessionId: s.id,
+          }) : Promise.resolve(),
+        ])
+      }))
+    }
   }
 
   // 2. confirmed 세션 중 scheduled_at에 도달했고 채팅방이 없는 경우 → 채팅방 오픈

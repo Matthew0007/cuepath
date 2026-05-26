@@ -3,9 +3,10 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
-  Home, Users, CalendarDays, Briefcase, User, LogOut, Settings,
+  Home, Users, CalendarDays, User, LogOut, Settings,
 } from 'lucide-react'
 import { AvatarImage } from '@/components/ui/avatar-image'
+import { NotificationBell } from '@/components/layout/NotificationBell'
 import { cn } from '@/lib/utils'
 import { createBrowserClient } from '@supabase/ssr'
 import { useRouter } from 'next/navigation'
@@ -14,6 +15,7 @@ interface AppNavProps {
   userName: string
   avatarUrl: string | null
   role: string
+  unreadCount?: number
 }
 
 const coacheeLinks = [
@@ -30,7 +32,7 @@ const coachLinks = [
   { href: '/profile',         label: '프로필', icon: User },
 ]
 
-export function AppNav({ userName, avatarUrl, role }: AppNavProps) {
+export function AppNav({ userName, avatarUrl, role, unreadCount = 0 }: AppNavProps) {
   const pathname = usePathname()
   const router = useRouter()
   const links = role === 'coach' ? coachLinks : coacheeLinks
@@ -92,6 +94,9 @@ export function AppNav({ userName, avatarUrl, role }: AppNavProps) {
             </Link>
           )}
         </nav>
+
+        {/* 알림 벨 */}
+        <NotificationBell initialUnreadCount={unreadCount} />
 
         {/* 구분선 */}
         <div className="hidden md:block w-px h-8 bg-gray-200" />

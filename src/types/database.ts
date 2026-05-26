@@ -78,6 +78,24 @@ export type Database = {
           },
         ]
       }
+      coach_favorites: {
+        Row: {
+          user_id: string
+          coach_id: string
+          created_at: string
+        }
+        Insert: {
+          user_id: string
+          coach_id: string
+          created_at?: string
+        }
+        Update: {
+          user_id?: string
+          coach_id?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
       coach_slots: {
         Row: {
           coach_id: string
@@ -109,6 +127,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      notifications: {
+        Row: {
+          id: string
+          user_id: string
+          type: string
+          title: string
+          body: string | null
+          link: string | null
+          is_read: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          type: string
+          title: string
+          body?: string | null
+          link?: string | null
+          is_read?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          type?: string
+          title?: string
+          body?: string | null
+          link?: string | null
+          is_read?: boolean
+          created_at?: string
+        }
+        Relationships: []
       }
       coaches: {
         Row: {

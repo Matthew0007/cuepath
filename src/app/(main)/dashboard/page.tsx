@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { AvatarImage } from '@/components/ui/avatar-image'
 import { cn } from '@/lib/utils'
-import { CalendarDays, ChevronRight, Star } from 'lucide-react'
+import { CalendarDays, ChevronRight, Heart, Star } from 'lucide-react'
 
 function fmtKST(iso: string) {
   return new Date(iso).toLocaleString('ko-KR', {
@@ -48,8 +48,24 @@ export default async function DashboardPage() {
     .order('scheduled_at', { ascending: true })
     .limit(3)
 
-  // 추천 컨설턴트 (평점 상위)
   const admin = createAdminClient()
+
+  // 즐겨찾기 컨설턴트
+  const { data: favRows } = await supabase
+    .from('coach_favorites')
+    .select('coach_id')
+    .eq('user_id', user.id)
+    .limit(4)
+
+  const favoriteCoaches = favRows && favRows.length > 0
+    ? await admin
+        .from('coaches')
+        .select(`id, bio, domains, rating, review_count, profiles!inner(full_name, avatar_url)`)
+        .in('id', favRows.map((f) => f.coach_id))
+        .then((r) => r.data ?? [])
+    : []
+
+  // 추천 컨설턴트 (평점 상위)
   const { data: featuredCoaches } = await admin
     .from('coaches')
     .select(`id, bio, domains, rating, review_count, profiles!inner(full_name, avatar_url)`)
@@ -57,9 +73,10 @@ export default async function DashboardPage() {
     .order('rating', { ascending: false })
     .limit(4)
 
-  // 아바타 signed URL 생성
+  // 아바타 signed URL 생성 (추천 + 즐겨찾기 합산)
+  const allCoaches = [...(featuredCoaches ?? []), ...favoriteCoaches]
   const coachesWithAvatars = await Promise.all(
-    (featuredCoaches ?? []).map(async (coach) => {
+    allCoaches.map(async (coach) => {
       const p = Array.isArray(coach.profiles) ? coach.profiles[0] : coach.profiles
       let avatarUrl: string | null = null
       if (p?.avatar_url) {
@@ -128,43 +145,94 @@ export default async function DashboardPage() {
         </div>
       )}
 
-      {/* 추천 컨설턴트 */}
-      <div className="bg-white rounded-xl border border-black/10 shadow-sm">
-        <div className="flex items-center justify-between px-5 pt-4 pb-3">
-          <p className="font-semibold text-gray-900">추천 컨설턴트</p>
-          <Link href="/coaches" className="text-xs text-[#0A66C2] hover:underline flex items-center gap-0.5">
-            전체 보기 <ChevronRight className="w-3 h-3" />
-          </Link>
-        </div>
-        <div className="divide-y divide-black/5">
-          {coachesWithAvatars.map((coach) => (
-            <Link
-              key={coach.id}
-              href={`/coaches/${coach.id}`}
-              className="flex items-start gap-3 px-5 py-4 hover:bg-gray-50 transition-colors"
-            >
-              <AvatarImage src={coach.avatarUrl} name={coach.profileName} size={44} />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-gray-900">{coach.profileName ?? '컨설턴트'}</p>
-                <div className="flex items-center gap-1 mt-0.5">
-                  <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                  <span className="text-xs text-gray-600">{coach.rating.toFixed(1)}</span>
-                  <span className="text-xs text-gray-400">({coach.review_count}개 후기)</span>
-                </div>
-                {coach.bio && (
-                  <p className="text-xs text-gray-500 mt-1 line-clamp-1">{coach.bio}</p>
-                )}
-                <div className="flex flex-wrap gap-1 mt-1.5">
-                  {coach.domains.slice(0, 2).map((d: string) => (
-                    <span key={d} className="text-[10px] bg-[#EAF0F8] text-[#0A66C2] px-1.5 py-0.5 rounded-full">{d}</span>
-                  ))}
-                </div>
+      {/* 즐겨찾기 컨설턴트 */}
+      {favoriteCoaches.length > 0 && (() => {
+        const favWithAvatars = coachesWithAvatars.filter((c) =>
+          favoriteCoaches.some((f) => f.id === c.id)
+        )
+        return (
+          <div className="bg-white rounded-xl border border-black/10 shadow-sm">
+            <div className="flex items-center justify-between px-5 pt-4 pb-3">
+              <div className="flex items-center gap-2">
+                <Heart className="w-4 h-4 text-red-400 fill-red-400" />
+                <p className="font-semibold text-gray-900">즐겨찾기</p>
               </div>
-              <ChevronRight className="w-4 h-4 text-gray-300 shrink-0 mt-1" />
-            </Link>
-          ))}
-        </div>
-      </div>
+              <Link href="/coaches" className="text-xs text-[#0A66C2] hover:underline flex items-center gap-0.5">
+                전체 보기 <ChevronRight className="w-3 h-3" />
+              </Link>
+            </div>
+            <div className="divide-y divide-black/5">
+              {favWithAvatars.map((coach) => (
+                <Link
+                  key={coach.id}
+                  href={`/coaches/${coach.id}`}
+                  className="flex items-start gap-3 px-5 py-4 hover:bg-gray-50 transition-colors"
+                >
+                  <AvatarImage src={coach.avatarUrl} name={coach.profileName} size={44} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-gray-900">{coach.profileName ?? '컨설턴트'}</p>
+                    <div className="flex items-center gap-1 mt-0.5">
+                      <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                      <span className="text-xs text-gray-600">{coach.rating.toFixed(1)}</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1 mt-1.5">
+                      {coach.domains.slice(0, 2).map((d: string) => (
+                        <span key={d} className="text-[10px] bg-[#EAF0F8] text-[#0A66C2] px-1.5 py-0.5 rounded-full">{d}</span>
+                      ))}
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-gray-300 shrink-0 mt-1" />
+                </Link>
+              ))}
+            </div>
+          </div>
+        )
+      })()}
+
+      {/* 추천 컨설턴트 */}
+      {(() => {
+        const featuredWithAvatars = coachesWithAvatars.filter((c) =>
+          (featuredCoaches ?? []).some((f) => f.id === c.id)
+        )
+        return (
+          <div className="bg-white rounded-xl border border-black/10 shadow-sm">
+            <div className="flex items-center justify-between px-5 pt-4 pb-3">
+              <p className="font-semibold text-gray-900">추천 컨설턴트</p>
+              <Link href="/coaches" className="text-xs text-[#0A66C2] hover:underline flex items-center gap-0.5">
+                전체 보기 <ChevronRight className="w-3 h-3" />
+              </Link>
+            </div>
+            <div className="divide-y divide-black/5">
+              {featuredWithAvatars.map((coach) => (
+                <Link
+                  key={coach.id}
+                  href={`/coaches/${coach.id}`}
+                  className="flex items-start gap-3 px-5 py-4 hover:bg-gray-50 transition-colors"
+                >
+                  <AvatarImage src={coach.avatarUrl} name={coach.profileName} size={44} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-gray-900">{coach.profileName ?? '컨설턴트'}</p>
+                    <div className="flex items-center gap-1 mt-0.5">
+                      <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                      <span className="text-xs text-gray-600">{coach.rating.toFixed(1)}</span>
+                      <span className="text-xs text-gray-400">({coach.review_count}개 후기)</span>
+                    </div>
+                    {coach.bio && (
+                      <p className="text-xs text-gray-500 mt-1 line-clamp-1">{coach.bio}</p>
+                    )}
+                    <div className="flex flex-wrap gap-1 mt-1.5">
+                      {coach.domains.slice(0, 2).map((d: string) => (
+                        <span key={d} className="text-[10px] bg-[#EAF0F8] text-[#0A66C2] px-1.5 py-0.5 rounded-full">{d}</span>
+                      ))}
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-gray-300 shrink-0 mt-1" />
+                </Link>
+              ))}
+            </div>
+          </div>
+        )
+      })()}
 
       {/* 컨설턴트 신청 CTA */}
       <div className="bg-white rounded-xl border border-black/10 shadow-sm p-5">
