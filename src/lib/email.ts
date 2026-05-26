@@ -4,7 +4,9 @@ const resend = process.env.RESEND_API_KEY
   ? new Resend(process.env.RESEND_API_KEY)
   : null
 
-const FROM = process.env.RESEND_FROM_EMAIL ?? 'Cuepath <noreply@cuepath.kr>'
+// 커스텀 도메인 인증 전: onboarding@resend.dev 사용 (Resend 계정 이메일로만 수신 가능)
+// 도메인 인증 후: RESEND_FROM_EMAIL=Cuepath <noreply@yourdomain.com> 환경변수 설정
+const FROM = process.env.RESEND_FROM_EMAIL ?? 'Cuepath <onboarding@resend.dev>'
 
 function fmtKST(iso: string) {
   return new Date(iso).toLocaleString('ko-KR', {
@@ -19,8 +21,14 @@ async function send(to: string, subject: string, html: string) {
     console.log('[Email skip] RESEND_API_KEY 미설정:', subject, '→', to)
     return
   }
+  // 커스텀 도메인 미인증 시: Resend 계정 이메일(RESEND_TEST_EMAIL)로만 발송 가능
+  // RESEND_TEST_EMAIL 설정 시 실제 수신자 대신 해당 이메일로 리다이렉트
+  const recipient = process.env.RESEND_TEST_EMAIL ?? to
   try {
-    await resend.emails.send({ from: FROM, to, subject, html })
+    await resend.emails.send({ from: FROM, to: recipient, subject, html })
+    if (process.env.RESEND_TEST_EMAIL) {
+      console.log(`[Email test] 실제 수신자: ${to} → 테스트 이메일(${recipient})로 리다이렉트`)
+    }
   } catch (err) {
     console.error('[Email 발송 실패]', err)
   }
