@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Cuepath",
+  title: "Cuepath : find your career",
   description: "커리어 코칭 매칭 플랫폼 — 검증된 컨설턴트와 1:1로 연결하세요",
 };
 

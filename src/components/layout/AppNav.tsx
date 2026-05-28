@@ -50,7 +50,10 @@ export function AppNav({ userName, avatarUrl, role, unreadCount = 0 }: AppNavPro
     <header className="sticky top-0 z-50 bg-white border-b border-black/10 shadow-sm">
       <div className="max-w-[1128px] mx-auto px-4 h-14 flex items-center gap-4">
         {/* 로고 */}
-        <Link href={role === 'coach' ? '/coach/dashboard' : '/dashboard'} className="shrink-0">
+        <Link
+          href={role === 'coach' ? '/coach/dashboard' : role === 'admin' ? '/admin' : '/dashboard'}
+          className="shrink-0"
+        >
           <span className="font-extrabold text-xl text-[#0A66C2] tracking-tight">Cuepath</span>
         </Link>
 
