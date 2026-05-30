@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import Link from 'next/link'
+import { SiteHeader } from '@/components/layout/SiteHeader'
 
 /* ── CSS: 마운트 시 <head>에 주입, 언마운트 시 제거 ── */
 const SALARY_CSS = `
@@ -13,12 +13,8 @@ const SALARY_CSS = `
   color:var(--text);
   font-family:'Pretendard',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
   min-height:100vh;
+  padding:28px 18px 80px;
 }
-.salary-header{background:#fff;border-bottom:1px solid var(--line);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;box-shadow:0 1px 3px rgba(0,0,0,0.06);}
-.salary-header-brand{font-weight:800;font-size:18px;color:#0A66C2;text-decoration:none;}
-.salary-header-back{font-size:13px;color:#64748b;text-decoration:none;display:flex;align-items:center;gap:4px;padding:6px 14px;border-radius:20px;border:1px solid #e2e8f0;background:#fff;transition:background .15s;}
-.salary-header-back:hover{background:#f8fafc;}
-.salary-content{padding:28px 18px 80px;}
 .salary-wrap{max-width:980px;margin:0 auto;}
 .salary-wrap h1{font-size:24px;font-weight:800;margin-bottom:4px;color:var(--text);}
 .salary-wrap .desc{color:var(--sub);font-size:13px;margin-bottom:24px;}
@@ -106,6 +102,49 @@ export default function SalaryPage() {
     style.id = 'salary-page-css'
     style.textContent = SALARY_CSS
     document.head.appendChild(style)
+
+    // ── 익명 ID (localStorage 기반, 디바이스당 1건)
+    function getAnonymousId(): string {
+      const KEY = 'cuepath_anon_id'
+      let id = localStorage.getItem(KEY)
+      if (!id) {
+        id = typeof crypto.randomUUID === 'function'
+          ? crypto.randomUUID()
+          : `${Math.random().toString(36).slice(2)}-${Date.now().toString(36)}`
+        localStorage.setItem(KEY, id)
+      }
+      return id
+    }
+
+    // ── 이벤트 추적 (fire-and-forget)
+    function trackEvent(eventType: string) {
+      const payload = {
+        event_type:      eventType,
+        anonymous_id:    getAnonymousId(),
+        current_company: (document.getElementById('c_company') as HTMLInputElement | null)?.value || null,
+        offer_company:   (document.getElementById('o_company') as HTMLInputElement | null)?.value || null,
+        current_base:    getRaw('c_base') || null,
+        current_bonus:   getRaw('c_bonus') || null,
+        offer_base:      getRaw('o_base')  || null,
+        offer_bonus:     getRaw('o_bonus') || null,
+        target_pct:      parseInt(((document.getElementById('rng-target') as HTMLInputElement | null)?.value ?? '20'), 10),
+        min_pct:         parseInt(((document.getElementById('rng-min')    as HTMLInputElement | null)?.value ?? '10'), 10),
+      }
+      fetch('/api/salary-events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      }).catch(() => {})
+    }
+
+    // ── 계산 결과 debounce 저장 (3초 후 유의미한 데이터 있을 때만)
+    let saveTimer: ReturnType<typeof setTimeout> | null = null
+    function debouncedSave() {
+      if (saveTimer) clearTimeout(saveTimer)
+      saveTimer = setTimeout(() => {
+        if (getRaw('c_base') > 0) trackEvent('calculate')
+      }, 3000)
+    }
 
     // ── 상태
     const retireMode: Record<string, string> = { c: 'auto', o: 'auto' }
@@ -307,6 +346,8 @@ export default function SalaryPage() {
         }
       })
       recalc()
+      // 버튼 클릭 이벤트 추적
+      trackEvent(mode === 'target' ? 'fill_target' : 'fill_min')
       if (absorbedSum > 0) {
         const names = absorbedKeys.map(k => OPT_LABEL[k]).join(', ')
         showToast(`${names} (${won(absorbedSum)}) → 대상 회사 기본급에 반영됐습니다.`)
@@ -430,6 +471,7 @@ export default function SalaryPage() {
         document.getElementById('th-diff-row')!.style.display   = 'none'
       }
       renderVerdict(hasOffer, offTotal, floor, target, anchor)
+      debouncedSave()
     }
 
     // ── 이벤트 등록
@@ -451,8 +493,12 @@ export default function SalaryPage() {
 
     recalc()
 
+    // ── 페이지 view 이벤트 (최초 로드)
+    trackEvent('view')
+
     // ── 정리
     return () => {
+      if (saveTimer) clearTimeout(saveTimer)
       const s = document.getElementById('salary-page-css')
       if (s) document.head.removeChild(s)
       const t = document.getElementById('salary-toast')
@@ -470,13 +516,9 @@ export default function SalaryPage() {
 
   return (
     <div className="salary-page">
-      {/* 상단 네비게이션 */}
-      <header className="salary-header">
-        <Link href="/" className="salary-header-brand">Cuepath</Link>
-        <Link href="/" className="salary-header-back">← 홈으로</Link>
-      </header>
+      {/* 상단 네비게이션 — 인증 상태 포함 */}
+      <SiteHeader backHref="/" />
 
-      <div className="salary-content">
       <div className="salary-wrap">
       <h1>연봉 비교·협상 계산기</h1>
       <p className="desc">모든 보상 항목을 총보상(Total Comp)으로 환산해 비교하고, 협상 3단계 금액을 산출합니다.</p>
@@ -487,6 +529,17 @@ export default function SalaryPage() {
         {/* ── 현재 회사 ── */}
         <div className="panel">
           <div className="panel-title"><span className="dot" style={{ background: 'var(--cur)' }} />현재 회사</div>
+
+          {/* 회사명 (선택) */}
+          <div className="field" style={{ marginBottom: '16px' }}>
+            <div className="field-header">
+              <label htmlFor="c_company">회사명</label>
+              <span style={{ fontSize: '11px', color: 'var(--sub2)' }}>선택 항목</span>
+            </div>
+            <input type="text" id="c_company" placeholder="회사명 검색 또는 직접 입력" list="salary-company-list" autoComplete="off" />
+            <div className="hint">입력하지 않아도 계산이 가능합니다</div>
+          </div>
+          <div className="section-divider" />
 
           <div className="section-label">기본 보상</div>
           <div className="field">
@@ -545,6 +598,17 @@ export default function SalaryPage() {
         {/* ── 대상 회사 ── */}
         <div className="panel">
           <div className="panel-title"><span className="dot" style={{ background: 'var(--tgt)' }} />대상 회사 제안</div>
+
+          {/* 회사명 (선택) */}
+          <div className="field" style={{ marginBottom: '16px' }}>
+            <div className="field-header">
+              <label htmlFor="o_company">회사명</label>
+              <span style={{ fontSize: '11px', color: 'var(--sub2)' }}>선택 항목</span>
+            </div>
+            <input type="text" id="o_company" placeholder="회사명 검색 또는 직접 입력" list="salary-company-list" autoComplete="off" />
+            <div className="hint">입력하지 않아도 계산이 가능합니다</div>
+          </div>
+          <div className="section-divider" />
 
           <div className="section-label">기본 보상</div>
           <div className="field">
@@ -742,7 +806,40 @@ export default function SalaryPage() {
         주식·RSU는 베스팅 일정·세금 별도 / 법인카드·차량 등 비과세 항목은 실질 가처분 기준으로 환산 / 실수령액은 2024년 세율 기준 근사치입니다.<br />
         본 계산은 협상 참고용이며 실제 합의는 직무·시장·개인 상황에 따라 달라집니다.
       </p>
-      </div>
+
+      {/* 회사명 자동완성 목록 (주요 한국 기업) */}
+      <datalist id="salary-company-list">
+        {[
+          '삼성전자','SK하이닉스','NAVER','카카오','카카오뱅크','토스(비바리퍼블리카)','현대자동차','기아','LG전자',
+          'LG에너지솔루션','삼성SDI','SK이노베이션','POSCO홀딩스','현대모비스','삼성바이오로직스','셀트리온',
+          '삼성물산','SK텔레콤','KT','LG유플러스','쿠팡','우아한형제들(배달의민족)','직방','당근마켓','야놀자',
+          '여기어때','크래프톤','넥슨','NC소프트','펄어비스','데브시스터즈','컴투스','위메이드','스마일게이트',
+          '카카오게임즈','라인플러스','하이브','SM엔터테인먼트','JYP엔터테인먼트','CJ ENM','현대건설',
+          '삼성엔지니어링','GS건설','DL이앤씨','SK에코플랜트','포스코건설','롯데건설','대우건설','HDC현대산업개발',
+          'KB국민은행','신한은행','하나은행','우리은행','NH농협은행','IBK기업은행','한국산업은행',
+          'KB증권','미래에셋증권','NH투자증권','삼성증권','키움증권','한국투자증권','메리츠증권','신한투자증권',
+          '삼성화재','DB손해보험','현대해상','메리츠화재','KB손해보험','한화손해보험',
+          '삼성생명','한화생명','교보생명','신한라이프','NH농협생명',
+          '아모레퍼시픽','LG생활건강','한국콜마','코스맥스','애경산업',
+          'CJ제일제당','롯데제과','오리온','빙그레','농심','풀무원','하림','동원F&B','대상',
+          'LG CNS','삼성SDS','SK C&C','현대오토에버','포스코DX','KT DS','롯데정보통신',
+          '대한항공','아시아나항공','제주항공','진에어','티웨이항공','에어부산',
+          'CJ대한통운','한진','롯데글로벌로지스','현대글로비스','HMM',
+          'SK에너지','GS칼텍스','에쓰오일','현대오일뱅크',
+          '한국전력공사','한국가스공사','한국수력원자력','한국동서발전','한국남부발전','한국중부발전','한국서부발전',
+          '코레일(한국철도공사)','서울교통공사','인천국제공항공사','한국공항공사',
+          '롯데쇼핑','이마트','GS리테일','BGF리테일','현대백화점','신세계','AK플라자',
+          '올리브영','무신사','29CM','W컨셉','에이블리','지그재그',
+          '마켓컬리','SSG닷컴','11번가','G마켓','옥션','인터파크','위메프',
+          '쏘카','카카오모빌리티','카카오T','버킷플레이스(오늘의집)','왓챠','웨이브',
+          '카카오엔터테인먼트','네이버웹툰','카카오웹툰',
+          '한화시스템','한화에어로스페이스','LIG넥스원','한국항공우주산업(KAI)',
+          '현대제철','고려아연','포스코인터내셔널','LS전선','LS일렉트릭',
+          '롯데케미칼','LG화학','SK케미칼','한화솔루션','효성화학',
+          '한국타이어','금호타이어','넥센타이어',
+        ].map(c => <option key={c} value={c} />)}
+      </datalist>
+
       </div>
     </div>
   )

@@ -65,7 +65,6 @@ export function FeatureBanners() {
               >
                 지금 사용하기 →
               </button>
-              <p className="text-center text-xs text-gray-400">무료 · 회원가입 불필요</p>
             </div>
           </div>
         </div>
