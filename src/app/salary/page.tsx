@@ -1,39 +1,48 @@
 'use client'
 
 import { useEffect } from 'react'
+import Link from 'next/link'
 
 /* ── CSS: 마운트 시 <head>에 주입, 언마운트 시 제거 ── */
 const SALARY_CSS = `
-:root {
-  --bg:#0f1115; --panel:#171a21; --panel2:#1c2029; --line:#262b36;
-  --text:#e6e9ef; --sub:#8b92a3; --sub2:#5c6270;
-  --cur:#5b9dd9; --tgt:#3ecf8e; --warn:#e8a13a; --bad:#e0635a; --purple:#a78bfa;
+.salary-page {
+  --bg:#F3F2EF; --panel:#FFFFFF; --panel2:#EAF0F8; --line:#e2e8f0;
+  --text:#1e293b; --sub:#64748b; --sub2:#94a3b8;
+  --cur:#0A66C2; --tgt:#059669; --warn:#d97706; --bad:#dc2626; --purple:#7c3aed;
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Pretendard',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  min-height:100vh;
 }
-body{background:var(--bg);color:var(--text);font-family:'Pretendard',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;padding:28px 18px 80px;}
+.salary-header{background:#fff;border-bottom:1px solid var(--line);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;box-shadow:0 1px 3px rgba(0,0,0,0.06);}
+.salary-header-brand{font-weight:800;font-size:18px;color:#0A66C2;text-decoration:none;}
+.salary-header-back{font-size:13px;color:#64748b;text-decoration:none;display:flex;align-items:center;gap:4px;padding:6px 14px;border-radius:20px;border:1px solid #e2e8f0;background:#fff;transition:background .15s;}
+.salary-header-back:hover{background:#f8fafc;}
+.salary-content{padding:28px 18px 80px;}
 .salary-wrap{max-width:980px;margin:0 auto;}
-.salary-wrap h1{font-size:24px;font-weight:800;margin-bottom:4px;}
+.salary-wrap h1{font-size:24px;font-weight:800;margin-bottom:4px;color:var(--text);}
 .salary-wrap .desc{color:var(--sub);font-size:13px;margin-bottom:24px;}
-.salary-wrap .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;}
-.salary-wrap .panel2{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:14px;}
+.salary-wrap .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,0.06);}
+.salary-wrap .panel2{background:var(--panel2);border:1px solid #bfdbfe;border-radius:10px;padding:14px;}
 .salary-wrap .cols{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
 .salary-wrap .panel-title{display:flex;align-items:center;gap:8px;font-weight:700;font-size:16px;margin-bottom:16px;}
 .salary-wrap .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
 .salary-wrap .field{margin-bottom:12px;}
 .salary-wrap .field-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
-.salary-wrap .field-header label{font-size:12px;color:var(--sub);}
-.salary-wrap .field input[type=text]{width:100%;padding:10px 12px;background:var(--bg);border:1px solid var(--line);border-radius:8px;color:var(--text);font-size:15px;font-family:inherit;outline:none;transition:border-color .2s;}
-.salary-wrap .field input[type=text]:focus{border-color:var(--sub);}
-.salary-wrap .field input[type=text].auto-val{color:var(--warn);border-color:#3a3010;}
+.salary-wrap .field-header label{font-size:12px;color:var(--sub);font-weight:500;}
+.salary-wrap .field input[type=text]{width:100%;padding:10px 12px;background:#fff;border:1px solid var(--line);border-radius:8px;color:var(--text);font-size:15px;font-family:inherit;outline:none;transition:border-color .2s;}
+.salary-wrap .field input[type=text]:focus{border-color:var(--cur);box-shadow:0 0 0 3px rgba(10,102,194,0.1);}
+.salary-wrap .field input[type=text].auto-val{color:var(--warn);border-color:#fde68a;background:#fffbeb;}
 .salary-wrap .field input[type=text]:read-only{opacity:.7;cursor:default;}
 .salary-wrap .hint{font-size:11px;color:var(--sub2);margin-top:3px;}
-.salary-wrap .badge{font-size:10px;padding:2px 6px;border-radius:4px;font-weight:600;cursor:pointer;user-select:none;}
-.salary-wrap .badge-auto{background:#2a2208;color:var(--warn);border:1px solid #4a3a10;}
-.salary-wrap .badge-manual{background:#1a2a1a;color:var(--tgt);border:1px solid #1a4a1a;}
+.salary-wrap .badge{font-size:10px;padding:2px 7px;border-radius:4px;font-weight:600;cursor:pointer;user-select:none;}
+.salary-wrap .badge-auto{background:#fffbeb;color:var(--warn);border:1px solid #fde68a;}
+.salary-wrap .badge-manual{background:#f0fdf4;color:var(--tgt);border:1px solid #bbf7d0;}
 .salary-wrap .section-divider{border-top:1px solid var(--line);margin:14px 0;}
 .salary-wrap .section-label{font-size:11px;color:var(--sub2);font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px;}
 .salary-wrap .opt-toggles{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
-.salary-wrap .opt-btn{font-size:12px;padding:5px 10px;border-radius:6px;cursor:pointer;border:1px solid var(--line);background:var(--bg);color:var(--sub);transition:all .15s;user-select:none;}
-.salary-wrap .opt-btn.active{border-color:var(--purple);background:#1e1a2e;color:var(--purple);}
+.salary-wrap .opt-btn{font-size:12px;padding:5px 10px;border-radius:6px;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--sub);transition:all .15s;user-select:none;}
+.salary-wrap .opt-btn.active{border-color:var(--purple);background:#f5f3ff;color:var(--purple);}
 .salary-wrap .opt-btn .ico{margin-right:3px;}
 .salary-wrap .opt-fields{display:none;}
 .salary-wrap .opt-fields.open{display:block;}
@@ -49,22 +58,22 @@ body{background:var(--bg);color:var(--text);font-family:'Pretendard',-apple-syst
 .salary-wrap .bar-row{margin-bottom:12px;}
 .salary-wrap .bar-meta{display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;}
 .salary-wrap .bar-meta span:last-child{font-weight:600;}
-.salary-wrap .bar-track{height:10px;background:var(--bg);border-radius:6px;overflow:hidden;}
+.salary-wrap .bar-track{height:10px;background:var(--line);border-radius:6px;overflow:hidden;}
 .salary-wrap .bar-fill{height:100%;border-radius:6px;transition:width .4s cubic-bezier(.4,0,.2,1);}
-.salary-wrap .diff-box{margin-top:12px;padding:10px 14px;background:var(--bg);border-radius:8px;font-size:14px;}
-.salary-wrap .item-diff-box{margin-top:10px;padding:12px 14px;background:var(--bg);border-radius:8px;}
+.salary-wrap .diff-box{margin-top:12px;padding:10px 14px;background:#f8fafc;border:1px solid var(--line);border-radius:8px;font-size:14px;}
+.salary-wrap .item-diff-box{margin-top:10px;padding:12px 14px;background:#f8fafc;border:1px solid var(--line);border-radius:8px;}
 .salary-wrap .item-diff-title{font-size:12px;color:var(--sub);margin-bottom:6px;font-weight:600;}
 .salary-wrap .item-tag{display:inline-block;font-size:11px;padding:3px 8px;border-radius:4px;margin:2px;}
-.salary-wrap .item-tag.loss{background:#2a1515;color:var(--bad);border:1px solid #4a1515;}
-.salary-wrap .item-tag.gain{background:#152a15;color:var(--tgt);border:1px solid #154a15;}
+.salary-wrap .item-tag.loss{background:#fef2f2;color:var(--bad);border:1px solid #fecaca;}
+.salary-wrap .item-tag.gain{background:#f0fdf4;color:var(--tgt);border:1px solid #bbf7d0;}
 .salary-wrap .step-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px;}
-.salary-wrap .step-card{padding:16px;border-radius:12px;background:var(--panel);border:1px solid var(--line);}
+.salary-wrap .step-card{padding:16px;border-radius:12px;background:var(--panel);border:1px solid var(--line);box-shadow:0 1px 3px rgba(0,0,0,0.06);}
 .salary-wrap .step-label{font-size:12px;color:var(--sub);}
 .salary-wrap .step-val{font-size:18px;font-weight:700;margin:6px 0 4px;}
 .salary-wrap .step-hint{font-size:11px;color:var(--sub);}
-.salary-wrap .verdict{padding:18px;border-radius:12px;background:var(--panel);border:1px solid;border-left-width:4px;}
+.salary-wrap .verdict{padding:18px;border-radius:12px;background:var(--panel);border:1px solid;border-left-width:4px;box-shadow:0 1px 3px rgba(0,0,0,0.06);}
 .salary-wrap .verdict-title{font-weight:700;font-size:16px;margin-bottom:6px;}
-.salary-wrap .verdict-body{font-size:14px;line-height:1.6;}
+.salary-wrap .verdict-body{font-size:14px;line-height:1.6;color:var(--text);}
 .salary-wrap .verdict-sub{font-size:13px;color:var(--sub);margin-top:8px;line-height:1.6;}
 .salary-wrap .takehome-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
 .salary-wrap .th-main{font-size:26px;font-weight:800;line-height:1.1;margin-bottom:4px;}
@@ -74,16 +83,16 @@ body{background:var(--bg);color:var(--text);font-family:'Pretendard',-apple-syst
 .salary-wrap .th-row span:first-child{color:var(--sub);}
 .salary-wrap .th-divider{border-top:1px dashed var(--line);margin:5px 0;}
 .salary-wrap .th-total-row{display:flex;justify-content:space-between;font-size:13px;font-weight:600;padding:4px 0;}
-.salary-wrap .th-diff-bar{margin-top:14px;padding:12px 16px;background:var(--bg);border-radius:8px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;}
+.salary-wrap .th-diff-bar{margin-top:14px;padding:12px 16px;background:#f8fafc;border:1px solid var(--line);border-radius:8px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;}
 .salary-wrap .th-diff-item{text-align:center;}
 .salary-wrap .th-diff-item .label{font-size:11px;color:var(--sub);margin-bottom:3px;}
 .salary-wrap .th-diff-item .value{font-size:15px;font-weight:700;}
 .salary-wrap .note{font-size:11px;color:var(--sub2);margin-top:20px;line-height:1.7;}
 .salary-wrap .fill-btn{font-size:11px;font-weight:600;padding:3px 9px;border-radius:5px;cursor:pointer;border:none;font-family:inherit;transition:all .15s;white-space:nowrap;}
-.salary-wrap .fill-btn-tgt{background:#0e2a1e;color:var(--tgt);border:1px solid #1a5a3a;}
-.salary-wrap .fill-btn-tgt:hover{background:#1a4a2e;}
-.salary-wrap .fill-btn-warn{background:#2a1e08;color:var(--warn);border:1px solid #5a3a10;}
-.salary-wrap .fill-btn-warn:hover{background:#3a2a0e;}
+.salary-wrap .fill-btn-tgt{background:#f0fdf4;color:var(--tgt);border:1px solid #bbf7d0;}
+.salary-wrap .fill-btn-tgt:hover{background:#dcfce7;}
+.salary-wrap .fill-btn-warn{background:#fffbeb;color:var(--warn);border:1px solid #fde68a;}
+.salary-wrap .fill-btn-warn:hover{background:#fef3c7;}
 @media(max-width:680px){
   .salary-wrap .cols,.salary-wrap .step-grid,.salary-wrap .param-grid,.salary-wrap .takehome-grid{grid-template-columns:1fr;}
   .salary-wrap h1{font-size:20px;}
@@ -310,7 +319,7 @@ export default function SalaryPage() {
       if (!el) {
         el = document.createElement('div')
         el.id = 'salary-toast'
-        el.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#1e2a1e;border:1px solid var(--tgt);color:var(--tgt);padding:10px 18px;border-radius:8px;font-size:13px;font-weight:500;z-index:9999;pointer-events:none;transition:opacity .3s;white-space:nowrap;max-width:90vw;text-align:center'
+        el.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#f0fdf4;border:1px solid #bbf7d0;color:#059669;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:500;z-index:9999;pointer-events:none;transition:opacity .3s;white-space:nowrap;max-width:90vw;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.1)'
         document.body.appendChild(el)
       }
       el.textContent = msg
@@ -460,7 +469,15 @@ export default function SalaryPage() {
   }
 
   return (
-    <div className="salary-wrap">
+    <div className="salary-page">
+      {/* 상단 네비게이션 */}
+      <header className="salary-header">
+        <Link href="/" className="salary-header-brand">Cuepath</Link>
+        <Link href="/" className="salary-header-back">← 홈으로</Link>
+      </header>
+
+      <div className="salary-content">
+      <div className="salary-wrap">
       <h1>연봉 비교·협상 계산기</h1>
       <p className="desc">모든 보상 항목을 총보상(Total Comp)으로 환산해 비교하고, 협상 3단계 금액을 산출합니다.</p>
 
@@ -725,6 +742,8 @@ export default function SalaryPage() {
         주식·RSU는 베스팅 일정·세금 별도 / 법인카드·차량 등 비과세 항목은 실질 가처분 기준으로 환산 / 실수령액은 2024년 세율 기준 근사치입니다.<br />
         본 계산은 협상 참고용이며 실제 합의는 직무·시장·개인 상황에 따라 달라집니다.
       </p>
+      </div>
+      </div>
     </div>
   )
 }
