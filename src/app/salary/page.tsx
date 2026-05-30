@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { SiteHeader } from '@/components/layout/SiteHeader'
+import { COMPANY_LIST } from '@/lib/companies'
 
 /* ── CSS: 마운트 시 <head>에 주입, 언마운트 시 제거 ── */
 const SALARY_CSS = `
@@ -13,9 +14,8 @@ const SALARY_CSS = `
   color:var(--text);
   font-family:'Pretendard',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
   min-height:100vh;
-  padding:28px 18px 80px;
 }
-.salary-wrap{max-width:980px;margin:0 auto;}
+.salary-wrap{max-width:980px;margin:0 auto;padding:28px 18px 80px;}
 .salary-wrap h1{font-size:24px;font-weight:800;margin-bottom:4px;color:var(--text);}
 .salary-wrap .desc{color:var(--sub);font-size:13px;margin-bottom:24px;}
 .salary-wrap .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,0.06);}
@@ -807,37 +807,9 @@ export default function SalaryPage() {
         본 계산은 협상 참고용이며 실제 합의는 직무·시장·개인 상황에 따라 달라집니다.
       </p>
 
-      {/* 회사명 자동완성 목록 (주요 한국 기업) */}
+      {/* 회사명 자동완성 목록 (주요 한국 기업, src/lib/companies.ts) */}
       <datalist id="salary-company-list">
-        {[
-          '삼성전자','SK하이닉스','NAVER','카카오','카카오뱅크','토스(비바리퍼블리카)','현대자동차','기아','LG전자',
-          'LG에너지솔루션','삼성SDI','SK이노베이션','POSCO홀딩스','현대모비스','삼성바이오로직스','셀트리온',
-          '삼성물산','SK텔레콤','KT','LG유플러스','쿠팡','우아한형제들(배달의민족)','직방','당근마켓','야놀자',
-          '여기어때','크래프톤','넥슨','NC소프트','펄어비스','데브시스터즈','컴투스','위메이드','스마일게이트',
-          '카카오게임즈','라인플러스','하이브','SM엔터테인먼트','JYP엔터테인먼트','CJ ENM','현대건설',
-          '삼성엔지니어링','GS건설','DL이앤씨','SK에코플랜트','포스코건설','롯데건설','대우건설','HDC현대산업개발',
-          'KB국민은행','신한은행','하나은행','우리은행','NH농협은행','IBK기업은행','한국산업은행',
-          'KB증권','미래에셋증권','NH투자증권','삼성증권','키움증권','한국투자증권','메리츠증권','신한투자증권',
-          '삼성화재','DB손해보험','현대해상','메리츠화재','KB손해보험','한화손해보험',
-          '삼성생명','한화생명','교보생명','신한라이프','NH농협생명',
-          '아모레퍼시픽','LG생활건강','한국콜마','코스맥스','애경산업',
-          'CJ제일제당','롯데제과','오리온','빙그레','농심','풀무원','하림','동원F&B','대상',
-          'LG CNS','삼성SDS','SK C&C','현대오토에버','포스코DX','KT DS','롯데정보통신',
-          '대한항공','아시아나항공','제주항공','진에어','티웨이항공','에어부산',
-          'CJ대한통운','한진','롯데글로벌로지스','현대글로비스','HMM',
-          'SK에너지','GS칼텍스','에쓰오일','현대오일뱅크',
-          '한국전력공사','한국가스공사','한국수력원자력','한국동서발전','한국남부발전','한국중부발전','한국서부발전',
-          '코레일(한국철도공사)','서울교통공사','인천국제공항공사','한국공항공사',
-          '롯데쇼핑','이마트','GS리테일','BGF리테일','현대백화점','신세계','AK플라자',
-          '올리브영','무신사','29CM','W컨셉','에이블리','지그재그',
-          '마켓컬리','SSG닷컴','11번가','G마켓','옥션','인터파크','위메프',
-          '쏘카','카카오모빌리티','카카오T','버킷플레이스(오늘의집)','왓챠','웨이브',
-          '카카오엔터테인먼트','네이버웹툰','카카오웹툰',
-          '한화시스템','한화에어로스페이스','LIG넥스원','한국항공우주산업(KAI)',
-          '현대제철','고려아연','포스코인터내셔널','LS전선','LS일렉트릭',
-          '롯데케미칼','LG화학','SK케미칼','한화솔루션','효성화학',
-          '한국타이어','금호타이어','넥센타이어',
-        ].map(c => <option key={c} value={c} />)}
+        {COMPANY_LIST.map(c => <option key={c} value={c} />)}
       </datalist>
 
       </div>
