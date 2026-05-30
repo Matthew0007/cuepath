@@ -71,7 +71,7 @@ export async function POST(request: Request) {
       ? session.coaches.profiles[0] : session.coaches?.profiles
     const coacheeProfile = Array.isArray(session.profiles)
       ? session.profiles[0] : session.profiles
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://cuepath.o-r.kr'
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://cuepath.vercel.app'
 
     Promise.all([
       createNotification({
