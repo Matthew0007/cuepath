@@ -84,7 +84,7 @@ export async function confirmSession(sessionId: string) {
   const coacheeProfile = Array.isArray(session.profiles)
     ? session.profiles[0] : session.profiles
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://cuepath.vercel.app'
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://cuepath.o-r.kr'
 
   // 알림 + 이메일 (병렬)
   await Promise.all([
