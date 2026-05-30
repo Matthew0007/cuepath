@@ -236,6 +236,12 @@ NEXT_PUBLIC_SITE_URL=https://cuepath.vercel.app
 - 세션 수락/거부: confirmSession / rejectSession server action (sessions/actions.ts), 세션페이지 + 코치대시보드 양쪽에서 인라인 처리 가능
 - 즐겨찾기: coach_favorites 테이블, FavoriteButton client 컴포넌트 (optimistic update), /coaches 페이지에서 하트 토글, 대시보드 즐겨찾기 섹션
 - DB migrations 실행 필요 (Supabase SQL Editor): 20260526000002_coach_application_docs.sql, 20260526000003_notifications_favorites.sql
+- favicon: src/app/icon.svg (파란 원 + 흰색 C), Next.js App Router가 자동으로 /favicon.ico 제공
+- 사이트 제목: "Cuepath : find your career" (layout.tsx metadata)
+- AppNav 로고 링크: role별 홈 분기 — coach→/coach/dashboard, admin→/admin, coachee→/dashboard
+- full_name null 버그: 20260528000000_fix_handle_new_user_and_backfill.sql Supabase SQL Editor 수동 실행 필요 (기존 유저 backfill 포함)
+- /salary 도구 페이지: 외부 HTML 툴을 Next.js client 컴포넌트로 통합. CSS는 .salary-wrap 접두사로 스코핑 후 useEffect에서 <style> 태그 주입/제거. vanilla JS 함수는 window.__salary 객체로 노출, JSX onClick은 `const S = () => (window as any).__salary` 패턴으로 참조
+- 독립 도구 페이지(다크 테마 등)는 글로벌 CSS 오염 방지를 위해 .wrap 클래스 prefix CSS 스코핑 + useEffect 주입 방식 사용
 
 ---
 
