@@ -218,6 +218,10 @@ NEXT_PUBLIC_SITE_URL=https://cuepath.vercel.app
 - GitHub Pages 미사용 — 정적 사이트만 지원, Vercel로 대체
 - 미들웨어 세션 검증은 getUser() 사용 — getSession()은 JWT 서버 검증 안 함 (보안 취약)
 - DB 타입은 supabase gen types typescript --local > src/types/database.ts 로 자동생성, 수동 작성 금지
+- DB 스키마 관리 규칙:
+  - 개별 변경: supabase/migrations/YYYYMMDDNNNNNN_설명.sql 파일로 작성 후 Supabase SQL Editor 수동 실행
+  - 스냅샷 동기화: supabase/schema_snapshot.sql 에 해당 변경 내용을 반드시 반영 (새 서버 세팅 시 이 파일 1개만 실행)
+  - 새 테이블·컬럼·정책 추가 시 migration 파일 생성 + schema_snapshot.sql 업데이트를 항상 세트로 진행
 - Next.js 16에서 middleware.ts → proxy.ts, export function middleware → proxy 로 변경됨
 - profiles 테이블 실제 컬럼 7개: id, email(NOT NULL), full_name(nullable), avatar_url, role, created_at, updated_at — name 컬럼 없음, full_name 사용할 것
 - handle_new_user 트리거는 Claude Code 자동 생성 불가 — Supabase SQL Editor에서 수동 실행 필요. insert 컬럼: (id, email, full_name, role) 4개, EXCEPTION 처리 포함할 것
